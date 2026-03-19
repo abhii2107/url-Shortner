@@ -1,11 +1,20 @@
-const sessionIdToUserMap = new Map(); // hashmap
+// in stateless we do not need the state we will make the tokens 
+// const sessionIdToUserMap = new Map(); // hashmap
 
-function setUser(id, user){
-    sessionIdToUserMap.set(id,user);
+const jwt = require("jsonwebtoken")
+
+const secret = "Abhishek$123$@";
+function setUser(user){
+    
+    return jwt.sign({
+        id:user.id,
+        email:user.email,
+    },secret);
 }
 
-function getUser(id){
-    return sessionIdToUserMap.get(id);
+function getUser(token){
+    if(!token) return null;
+    return jwt.verify(token,secret);
 }
 
 module.exports = {
