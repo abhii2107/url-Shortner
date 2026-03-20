@@ -1,32 +1,31 @@
-const{getUser} =  require("../service.js/auth")
+const { getUser } = require("../service.js/auth")
 
-
-async function restrictToLoggedinUserOnly(req,res,next){
-    const userUid = req.cookies?.uid;
-
-    if(!userUid) return res.redirect("/login")
-    const user = getUser(userUid);
-
-    if(!user) return res.redirect("/login")
+function checkForAuthentication(req, res, next) {
+    const tokenCookie = req.cookies?.token
+    req.user = null;
+    if (!tokenCookie) {
+        return next();
+    }
+    const token = tokenCookie;
+    const user = getUser(token);
 
     req.user = user;
     next();
-//    now we have to use cookie-parser in index.js
 }
 
-async function checkAuth(req,res,next){
-    const userUid = req.cookies?.uid;
-    // it is just checking not enforcing that you need to logged in
-    
-    const user = getUser(userUid);
+function restrictTo(roles = []) {
+    return function (req, res, next) {
+        if (!req.user) return res.redirect("/login")
 
-    
+        if (!roles.includes(req.user.role)) res.end("unauthorized")
 
-    req.user = user;
-    next();
+        next();
+    }
+
+
 }
 
 module.exports = {
-    restrictToLoggedinUserOnly,
-    checkAuth
+    checkForAuthentication,
+    restrictTo
 }

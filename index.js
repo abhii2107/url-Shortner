@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser")
 const { connectToMongoDB } = require("./connect")
 const { handleGetAnalytics } = require("./controllers/url")
 const URL = require("./models/url")
-const{restrictToLoggedinUserOnly,checkAuth} = require("./middleware/auth")
+const{ checkForAuthentication, restrictTo} = require("./middleware/auth")
 const urlRoute = require("./routes/url")
 const staticRoute = require("./routes/staticRouter");
 const userRoute = require('./routes/user')
@@ -18,6 +18,7 @@ const PORT = 8001;
 app.use(express.json());
 app.use(express.urlencoded({extended: false}))
 app.use(cookieParser());
+app.use(checkForAuthentication)
 
 
 app.set("view engine","ejs")
@@ -30,9 +31,9 @@ app.set('views',path.resolve("./views"));//views ki file iss folder pe padi hai
 connectToMongoDB("mongodb://localhost:27017/short-url").then(() => console.log("mongodb connected"))
 
 
-app.use("/url",restrictToLoggedinUserOnly ,urlRoute) // you need to logged in to acces anything
+app.use("/url",restrictTo(["NORMAL","ADMIN"]) ,urlRoute) // you need to logged in to acces anything
 app.use("/",staticRoute)
-app.use("/user",checkAuth,userRoute)
+app.use("/user",userRoute)
 
 
 app.get("/analytics/:shortId", handleGetAnalytics)

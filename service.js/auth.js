@@ -9,6 +9,7 @@ function setUser(user){
     return jwt.sign({
         id:user.id,
         email:user.email,
+        role:user.role,
     },secret);
 }
 
@@ -20,4 +21,4 @@ function getUser(token){
 module.exports = {
     setUser,
     getUser
-}
+} 
